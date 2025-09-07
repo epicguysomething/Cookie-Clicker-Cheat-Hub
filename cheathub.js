@@ -53,14 +53,13 @@
         textShadow: '0 0 4px rgba(0,0,0,0.3)',
     });
 
-    // Controls container for minimize, close, and theme toggle
+    // Controls container
     const controls = document.createElement('div');
     Object.assign(controls.style, {
         display: 'flex',
         gap: '10px',
     });
 
-    // Button helper to create icon buttons
     function iconButton(symbol, hoverColor, titleText) {
         const btn = document.createElement('button');
         btn.textContent = symbol;
@@ -108,7 +107,7 @@
     header.append(title, controls);
     hub.append(header);
 
-    // Container for buttons
+    // Button container
     const btnContainer = document.createElement('div');
     Object.assign(btnContainer.style, {
         display: 'flex',
@@ -117,9 +116,7 @@
     });
     hub.append(btnContainer);
 
-    // Button factory with gradient backgrounds and hover effects
     function btn(label, colors, onClick) {
-        // colors: {start, end}
         const b = document.createElement('button');
         b.textContent = label;
         Object.assign(b.style, {
@@ -158,7 +155,7 @@
         return b;
     }
 
-    // Buttons with refined colors
+    // Buttons
     btn('🍪 Infinite Cookies', { start: '#3CAF50', end: '#2E7D32' }, () => {
         Game.cookies = Infinity;
         Game.Notify("∞ cookies!", "", "", 1, 1);
@@ -182,6 +179,24 @@
             Game.recalculateGains = 1;
             Game.Notify("1T You!", "", "", 1, 1);
         }
+    });
+
+    btn('🌍 1 Trillion of Everything', { start: '#2196F3', end: '#1565C0' }, () => {
+        const objects = Game.Objects;
+        for (const object in objects) {
+            if (objects.hasOwnProperty(object) && object !== 'Cursor') {
+                const obj = objects[object];
+                obj.amount = obj.bought = 1e12;
+                Game.BuildingsOwned += 1e12;
+            }
+        }
+        const cursor = Game.Objects?.Cursor;
+        if (cursor) {
+            cursor.amount = cursor.bought = 10000;
+            Game.BuildingsOwned += 10000;
+        }
+        Game.recalculateGains = 1;
+        Game.Notify("1T of Everything!", "", "", 1, 1);
     });
 
     btn('🖱️ 10 Thousand Cursors', { start: '#2196F3', end: '#1565C0' }, () => {
@@ -234,7 +249,20 @@
         }
     });
 
-    // Minimize toggle logic
+    // NEW BUTTON: Level 1 Trillion of Everything
+    btn('📈 Level 1 Trillion of Everything', { start: '#0288D1', end: '#01579B' }, () => {
+        const objects = Game.Objects;
+        for (const object in objects) {
+            if (objects.hasOwnProperty(object)) {
+                const obj = objects[object];
+                obj.level = 1e12;
+                if (obj.refresh) obj.refresh();
+            }
+        }
+        Game.Notify("Everything leveled to 1T!", "", "", 1, 1);
+    });
+
+    // Minimize toggle
     let minimized = false;
     minBtn.onclick = () => {
         minimized = !minimized;
@@ -247,12 +275,12 @@
 
     closeBtn.onclick = () => hub.remove();
 
-    // Theme toggle logic (green <-> dark mode)
+    // Theme toggle
     themeBtn.onclick = () => {
         darkTheme = !darkTheme;
         if (darkTheme) {
             hub.style.background = 'rgba(20, 20, 20, 0.85)';
-            hub.style.borderColor = '#808080';  // gray outline in dark mode
+            hub.style.borderColor = '#808080';
             title.style.textShadow = '0 0 5px #0f0';
             themeBtn.textContent = '🌙';
         } else {
@@ -263,7 +291,7 @@
         }
     };
 
-    // Dragging logic with 15px hitbox on edges
+    // Dragging logic
     hub.addEventListener('mousedown', (e) => {
         const r = hub.getBoundingClientRect();
         if (
